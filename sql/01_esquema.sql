@@ -6,7 +6,7 @@
 -- =====================================================================
 
 -- Borra las tablas si ya existen, para poder ejecutar el script varias veces.
--- Orden: primero las "hijas" (las que tienen claves foráneas), luego las "padres".
+-- Orden: primero las "hijas" (tienen claves foráneas), luego las "padres".
 DROP TABLE IF EXISTS formacion_academica;
 DROP TABLE IF EXISTS grupo_familiar;
 DROP TABLE IF EXISTS funcionarios;
@@ -14,50 +14,55 @@ DROP TABLE IF EXISTS estado_civil;
 DROP TABLE IF EXISTS tipo_documento;
 
 -- ---------------------------------------------------------------------
--- 1. CATÁLOGOS (no apuntan a nadie; las demás tablas apuntan a ellos)
+-- 1. CATÁLOGOS: listas cortas de valores posibles. No apuntan a nadie;
+--    la tabla funcionarios apunta a ellos. Se crean PRIMERO.
 -- ---------------------------------------------------------------------
-
--- EJEMPLO RESUELTO: léelo línea por línea antes de escribir las tuyas.
 CREATE TABLE tipo_documento (
     id_tipo_documento  SERIAL       PRIMARY KEY,     -- SERIAL: PostgreSQL asigna 1, 2, 3... solo
     nombre             VARCHAR(40)  NOT NULL UNIQUE  -- 'Cédula de ciudadanía', 'Pasaporte'... sin repetidos
 );
 
--- TODO 1: escribe la tabla estado_civil (misma forma que tipo_documento).
-
-
--- ---------------------------------------------------------------------
--- 2. TABLA PRINCIPAL
--- ---------------------------------------------------------------------
-
--- TODO 2: escribe la tabla funcionarios con estas columnas:
---   id_funcionario      clave primaria autoincremental
---   id_tipo_documento   entero, obligatorio, CLAVE FORÁNEA -> ¿a qué tabla?
---   numero_documento    texto de hasta 20, obligatorio   (¿por qué texto y no INT? lo viste el 16-oct)
---   nombres             texto de hasta 80, obligatorio
---   apellidos           texto de hasta 80, obligatorio
---   id_estado_civil     entero, obligatorio, CLAVE FORÁNEA -> ¿a qué tabla?
---   sexo                CHAR(1), obligatorio, solo 'M' o 'F'  -> pista: CHECK (sexo IN ('M', 'F'))
---   direccion           texto de hasta 150 (opcional)
---   telefono            texto de hasta 20 (opcional)
---   fecha_nacimiento    DATE, obligatorio
---
--- Al final, antes del paréntesis de cierre, esta restricción (cópiala tal cual):
---   CONSTRAINT uq_funcionario_documento UNIQUE (id_tipo_documento, numero_documento)
---
--- Sintaxis de una clave foránea en PostgreSQL:
---   nombre_columna INT NOT NULL REFERENCES otra_tabla(columna_pk)
-
+CREATE TABLE estado_civil (
+    id_estado_civil    SERIAL       PRIMARY KEY,
+    nombre             VARCHAR(40)  NOT NULL UNIQUE  -- 'Soltero(a)', 'Casado(a)'... sin repetidos
+);
 
 -- ---------------------------------------------------------------------
--- 3. TABLAS "HIJAS" DEL FUNCIONARIO (lado "muchos" de la relación)
+-- 2. TABLA PRINCIPAL: muchos funcionarios -> un tipo de documento
+--                     muchos funcionarios -> un estado civil
 -- ---------------------------------------------------------------------
+CREATE TABLE funcionarios (
+    id_funcionario     SERIAL        PRIMARY KEY,
+    id_tipo_documento  INT           NOT NULL REFERENCES tipo_documento(id_tipo_documento),
+    numero_documento   VARCHAR(20)   NOT NULL,       -- texto: puede tener ceros iniciales o letras (pasaporte)
+    nombres            VARCHAR(80)   NOT NULL,
+    apellidos          VARCHAR(80)   NOT NULL,
+    id_estado_civil    INT           NOT NULL REFERENCES estado_civil(id_estado_civil),
+    sexo               CHAR(1)       NOT NULL CHECK (sexo IN ('M', 'F')),
+    direccion          VARCHAR(150),
+    telefono           VARCHAR(20),
+    fecha_nacimiento   DATE          NOT NULL,
+    -- Una misma persona no puede registrarse dos veces con el mismo documento
+    CONSTRAINT uq_funcionario_documento UNIQUE (id_tipo_documento, numero_documento)
+);
 
--- TODO 3: grupo_familiar
---   id_familiar (PK), id_funcionario (FK), nombres, apellidos, rol ('Hijo', 'Cónyuge'...)
---   La FK termina así:  REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE
+-- ---------------------------------------------------------------------
+-- 3. TABLAS HIJAS: un funcionario -> muchos familiares / muchos estudios.
+--    La clave foránea va aquí, en el lado "muchos".
+--    ON DELETE CASCADE: si se elimina el funcionario, se eliminan sus filas aquí.
+-- ---------------------------------------------------------------------
+CREATE TABLE grupo_familiar (
+    id_familiar        SERIAL        PRIMARY KEY,
+    id_funcionario     INT           NOT NULL REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE,
+    nombres            VARCHAR(80)   NOT NULL,
+    apellidos          VARCHAR(80)   NOT NULL,
+    rol                VARCHAR(30)   NOT NULL        -- 'Hijo(a)', 'Cónyuge', 'Padre', 'Madre'...
+);
 
-
--- TODO 4: formacion_academica
---   id_formacion (PK), id_funcionario (FK con ON DELETE CASCADE), universidad, nivel_estudio, titulo
-
+CREATE TABLE formacion_academica (
+    id_formacion       SERIAL        PRIMARY KEY,
+    id_funcionario     INT           NOT NULL REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE,
+    universidad        VARCHAR(120)  NOT NULL,
+    nivel_estudio      VARCHAR(40)   NOT NULL,       -- 'Pregrado', 'Especialización', 'Maestría'...
+    titulo             VARCHAR(120)  NOT NULL
+);
