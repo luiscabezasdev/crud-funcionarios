@@ -1,0 +1,40 @@
+erDiagram
+    TIPO_DOCUMENTO ||--o{ FUNCIONARIOS : "identifica a"
+    ESTADO_CIVIL ||--o{ FUNCIONARIOS : "describe a"
+    FUNCIONARIOS ||--o{ GRUPO_FAMILIAR : "tiene"
+    FUNCIONARIOS ||--o{ FORMACION_ACADEMICA : "tiene"
+
+    TIPO_DOCUMENTO {
+        int id_tipo_documento PK
+        varchar nombre UK
+    }
+    ESTADO_CIVIL {
+        int id_estado_civil PK
+        varchar nombre UK
+    }
+    FUNCIONARIOS {
+        int id_funcionario PK
+        int id_tipo_documento FK
+        varchar numero_documento
+        varchar nombres
+        varchar apellidos
+        int id_estado_civil FK
+        char sexo
+        varchar direccion
+        varchar telefono
+        date fecha_nacimiento
+    }
+    GRUPO_FAMILIAR {
+        int id_familiar PK
+        int id_funcionario FK
+        varchar nombres
+        varchar apellidos
+        varchar rol
+    }
+    FORMACION_ACADEMICA {
+        int id_formacion PK
+        int id_funcionario FK
+        varchar universidad
+        varchar nivel_estudio
+        varchar titulo
+    }
