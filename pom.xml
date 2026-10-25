@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>co.edu.iudigital</groupId>
+    <artifactId>crud-funcionarios</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+    <name>CRUD Funcionarios</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Compila para Java 17: corre en Java 17 o superior -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <!-- Clase que NetBeans ejecuta con "Run Project" (F6) -->
+        <exec.mainClass>co.edu.iudigital.funcionarios.Main</exec.mainClass>
+    </properties>
+
+    <dependencies>
+        <!-- Driver JDBC de PostgreSQL: el "traductor" entre Java y la base de datos -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version>
+        </dependency>
+    </dependencies>
+</project>
