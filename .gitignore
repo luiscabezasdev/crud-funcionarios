@@ -1,2 +1,4 @@
 *.class
 target/
+# Credenciales locales: nunca a GitHub
+src/main/resources/db.properties

@@ -2,7 +2,7 @@
 -- 01_esquema.sql · Base de datos del CRUD de funcionarios (PostgreSQL)
 -- Caso de estudio: Recursos Humanos, IU Digital de Antioquia
 -- Ejecutar desde WSL, en la carpeta del proyecto:
---   psql -h localhost -U crud_user -d funcionarios_db -f sql/01_esquema.sql
+--   psql -h localhost -p 5433 -U crud_user -d funcionarios_db -f sql/01_esquema.sql
 -- =====================================================================
 
 -- Borra las tablas si ya existen, para poder ejecutar el script varias veces.

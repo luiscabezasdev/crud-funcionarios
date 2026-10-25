@@ -1,0 +1,5 @@
+# Copia este archivo como db.properties (misma carpeta) y pon tu contraseña.
+# db.properties NO se sube a GitHub.
+db.url=jdbc:postgresql://localhost:5433/funcionarios_db
+db.usuario=crud_user
+db.clave=CAMBIA_ESTO

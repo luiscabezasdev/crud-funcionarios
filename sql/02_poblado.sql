@@ -2,7 +2,7 @@
 -- 02_poblado.sql · Datos iniciales para que la aplicación arranque
 -- Ejecutar DESPUÉS de 01_esquema.sql (que deja las tablas vacías y los
 -- contadores SERIAL en 1):
---   psql -h localhost -U crud_user -d funcionarios_db -f sql/02_poblado.sql
+--   psql -h localhost -p 5433 -U crud_user -d funcionarios_db -f sql/02_poblado.sql
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
