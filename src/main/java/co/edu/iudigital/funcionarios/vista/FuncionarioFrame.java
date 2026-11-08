@@ -4,12 +4,16 @@ import co.edu.iudigital.funcionarios.dao.CatalogoDAO;
 import co.edu.iudigital.funcionarios.dao.CatalogoDAOImpl;
 import co.edu.iudigital.funcionarios.dao.FuncionarioDAO;
 import co.edu.iudigital.funcionarios.dao.FuncionarioDAOImpl;
+import co.edu.iudigital.funcionarios.dao.FuncionarioDAOSeguro;
+import co.edu.iudigital.funcionarios.excepciones.AccesoDenegadoException;
 import co.edu.iudigital.funcionarios.excepciones.DAOException;
 import co.edu.iudigital.funcionarios.excepciones.RegistroDuplicadoException;
 import co.edu.iudigital.funcionarios.excepciones.ValidacionException;
 import co.edu.iudigital.funcionarios.modelo.EstadoCivil;
 import co.edu.iudigital.funcionarios.modelo.Funcionario;
 import co.edu.iudigital.funcionarios.modelo.TipoDocumento;
+import co.edu.iudigital.funcionarios.seguridad.Permiso;
+import co.edu.iudigital.funcionarios.seguridad.Sesion;
 import co.edu.iudigital.funcionarios.util.ValidadorFuncionario;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -40,7 +44,9 @@ import javax.swing.table.DefaultTableModel;
 public class FuncionarioFrame extends JFrame {
 
     // La vista depende de las INTERFACES del DAO, no de las clases con SQL
-    private final FuncionarioDAO funcionarioDAO = new FuncionarioDAOImpl();
+    // El DAO real va envuelto en el "guardia": verifica el permiso del rol antes de cada operación
+    private final FuncionarioDAO funcionarioDAO = new FuncionarioDAOSeguro(new FuncionarioDAOImpl());
+    private final boolean puedeEscribir = Sesion.tiene(Permiso.CREAR);
     private final CatalogoDAO catalogoDAO = new CatalogoDAOImpl();
 
     // ---- Formulario
@@ -60,6 +66,7 @@ public class FuncionarioFrame extends JFrame {
     private final JButton btnEliminar = new JButton("Eliminar");
     private final JButton btnLimpiar = new JButton("Limpiar");
     private final JButton btnRefrescar = new JButton("Refrescar lista");
+    private final JButton btnCerrarSesion = new JButton("Cerrar sesión");
 
     // ---- Tabla (Listar)
     private final DefaultTableModel modeloTabla = new DefaultTableModel(
@@ -118,7 +125,13 @@ public class FuncionarioFrame extends JFrame {
         JScrollPane panelTabla = new JScrollPane(tabla);
         panelTabla.setBorder(BorderFactory.createTitledBorder("Funcionarios registrados"));
 
+        JPanel encabezado = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        encabezado.add(new JLabel("Usuario: " + Sesion.usuario().getUsername()
+                + "  |  Rol: " + Sesion.usuario().getRol()));
+        encabezado.add(btnCerrarSesion);
+
         setLayout(new BorderLayout(8, 8));
+        add(encabezado, BorderLayout.NORTH);
         add(formulario, BorderLayout.WEST);
         add(panelTabla, BorderLayout.CENTER);
         add(botones, BorderLayout.SOUTH);
@@ -141,6 +154,11 @@ public class FuncionarioFrame extends JFrame {
         btnEliminar.addActionListener(e -> eliminar());
         btnLimpiar.addActionListener(e -> limpiarFormulario());
         btnRefrescar.addActionListener(e -> cargarTabla());
+        btnCerrarSesion.addActionListener(e -> {
+            Sesion.cerrar();
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
 
         // Al hacer clic en una fila, sus datos pasan al formulario (para editar o eliminar)
         tabla.getSelectionModel().addListSelectionListener(e -> {
@@ -181,6 +199,8 @@ public class FuncionarioFrame extends JFrame {
             mostrarInfo("Funcionario creado con id " + idNuevo + ".");
         } catch (ValidacionException e) {
             mostrarAdvertencia("Revisa el formulario:\n" + e.getMessage());
+        } catch (AccesoDenegadoException e) {      // autorización: el rol no tiene el permiso
+            mostrarAdvertencia(e.getMessage());
         } catch (RegistroDuplicadoException e) {     // la más específica va ANTES que DAOException
             mostrarAdvertencia(e.getMessage());
         } catch (DAOException e) {
@@ -204,6 +224,8 @@ public class FuncionarioFrame extends JFrame {
             mostrarInfo("Funcionario actualizado.");
         } catch (ValidacionException e) {
             mostrarAdvertencia("Revisa el formulario:\n" + e.getMessage());
+        } catch (AccesoDenegadoException e) {      // autorización: el rol no tiene el permiso
+            mostrarAdvertencia(e.getMessage());
         } catch (RegistroDuplicadoException e) {
             mostrarAdvertencia(e.getMessage());
         } catch (DAOException e) {
@@ -229,6 +251,8 @@ public class FuncionarioFrame extends JFrame {
             cargarTabla();
             limpiarFormulario();
             mostrarInfo("Funcionario eliminado.");
+        } catch (AccesoDenegadoException e) {
+            mostrarAdvertencia(e.getMessage());
         } catch (DAOException e) {
             mostrarError(e.getMessage());
         }
@@ -289,8 +313,8 @@ public class FuncionarioFrame extends JFrame {
             txtTelefono.setText(f.getTelefono() == null ? "" : f.getTelefono());
             txtFechaNacimiento.setText(f.getFechaNacimiento() == null ? "" : f.getFechaNacimiento().toString());
             btnCrear.setEnabled(false);
-            btnActualizar.setEnabled(true);
-            btnEliminar.setEnabled(true);
+            btnActualizar.setEnabled(puedeEscribir);
+            btnEliminar.setEnabled(puedeEscribir);
         } catch (DAOException e) {
             mostrarError(e.getMessage());
         }
@@ -308,7 +332,7 @@ public class FuncionarioFrame extends JFrame {
         if (cbTipoDocumento.getItemCount() > 0) cbTipoDocumento.setSelectedIndex(0);
         if (cbEstadoCivil.getItemCount() > 0) cbEstadoCivil.setSelectedIndex(0);
         cbSexo.setSelectedIndex(0);
-        btnCrear.setEnabled(true);
+        btnCrear.setEnabled(puedeEscribir);
         btnActualizar.setEnabled(false);
         btnEliminar.setEnabled(false);
     }

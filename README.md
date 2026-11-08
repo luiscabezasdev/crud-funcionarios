@@ -66,3 +66,18 @@ Todas las consultas usan `PreparedStatement` con parámetros `?`, lo que evita l
 | `DAOException` | Cualquier otro error de base de datos: sin conexión, clave incorrecta, clave foránea inválida | Mensaje claro y genérico |
 
 `TraductorErrores` convierte cada `SQLException` en una de estas excepciones según su **SQLState**. El detalle técnico se escribe en el log y al usuario solo le llega un mensaje comprensible, sin exponer información interna de la base de datos.
+
+## Seguridad: autenticación y autorización
+
+La aplicación abre con un **login**. Hay dos roles: `ADMIN` (lee, crea, edita y elimina) y `CONSULTA` (solo lee). Detalle en [`docs/seguridad.md`](docs/seguridad.md).
+
+```bash
+psql -h localhost -p 5433 -U crud_user -d funcionarios_db -f sql/03_seguridad.sql
+```
+
+| Usuario | Contraseña | Rol |
+|---|---|---|
+| `admin` | `Admin#2026` | ADMIN |
+| `consulta` | `Consulta#2026` | CONSULTA |
+
+Contraseñas de ejemplo solo para la demostración. En la base de datos se guarda únicamente el hash PBKDF2 con salt.

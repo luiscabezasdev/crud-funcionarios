@@ -56,18 +56,18 @@ INSERT INTO formacion_academica (id_funcionario, universidad, nivel_estudio, tit
 
 INSERT INTO funcionarios (id_tipo_documento, numero_documento, nombres, apellidos,
                           id_estado_civil, sexo, direccion, telefono, fecha_nacimiento)
-VALUES (1, '1025478541', 'Luis Enrique', 'Sanchez Suarez',
+VALUES (3, 'AV1025478', 'Luis Enrique', 'Sanchez Suarez',
         1, 'M', 'Carrera 65 # 15-18, Medellín', '3205875412', '1986-08-26');
 
 
 INSERT INTO funcionarios (id_tipo_documento, numero_documento, nombres, apellidos,
                           id_estado_civil, sexo, direccion, telefono, fecha_nacimiento)
 VALUES (1, '1147524514', 'Maria del Carmen', 'Ortiz Diaz',
-        1, 'F', 'Diagonal 23 # 116 - 20, San Antonio de Prado', '3118752142', '2000-01-16');
+        3, 'F', 'Diagonal 23 # 116 - 20, San Antonio de Prado', '3118752142', '2000-01-16');
 
 INSERT INTO grupo_familiar (id_funcionario, nombres, apellidos, rol) VALUES
     (2, 'Humberto',  'Sanchez Suarez', 'Hermano'),
-    (3, 'Julio', 'Diaz Ortiz', 'Conyugue');
+    (3, 'Julio', 'Diaz Ortiz', 'Cónyuge');
 
 INSERT INTO formacion_academica (id_funcionario, universidad, nivel_estudio, titulo) VALUES
     (2, 'IU Digital de Antioquia', 'Pregrado', 'Administracion de Empresas'),
